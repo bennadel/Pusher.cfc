@@ -4,8 +4,8 @@
 by Ben Nadel 
 ([www.bennadel.com][3])
 
-A ColdFusion wrapper for the [Puserh.com][5] REST API. This ColdFusion 
-component has been tested with [verion 1.12 of the Pusher.com client][2]. 
+A ColdFusion wrapper for the [Pusher.com][5] REST API. This ColdFusion 
+component has been tested with [version 1.12 of the Pusher.com client][2]. 
 The actual Pusher.cfc exposes two different methods for publication:
 
 * pushToAllSubscribers( channel, eventType, message )
