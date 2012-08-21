@@ -35,12 +35,7 @@ Pusher client, you had to host the "swf" fallback file yourself; this is no
 longer the case. Now, the Pusher client will load the fallback "swf" as 
 needed from its own servers.
 
-## Vendor Libraries
 
-* [Crypto.cfc by Ben Nadel][1]
-
-
-[1]: https://github.com/bennadel/Crypto.cfc
 [2]: http://js.pusher.com/1.12/pusher.min.js
 [3]: http://www.bennadel.com
 [4]: http://pusher.com/docs/authenticating_users
