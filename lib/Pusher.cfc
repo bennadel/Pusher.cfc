@@ -6,20 +6,17 @@ component
 	{
 
 
-	// I initialize the component. The Crypto library is used to create Hashed Message Authentication 
-	// Codes for creating request signatures.
+	// I initialize the component.
 	function init(
 		String appID,
 		String appKey,
-		String appSecret,
-		Any crypto
+		String appSecret
 		){
 
 		// Store the properties.
 		variables.appID = appID;
 		variables.appKey = appKey;
 		variables.appSecret = appSecret;
-		variables.crypto = crypto;
 
 		// Return this object reference.
 		return( this );
@@ -127,9 +124,9 @@ component
 	// I compute a hashed message authentication code using the SHA-256 algorithm.
 	function _hmacSha256( String key, String input ){
 
-		// Pass this off to the Crypto library.
+		// Pass this off to the hmac() function.
 		return(
-			variables.crypto.hmacSha256( key, input )
+			lcase( hmac( input, key, "HmacSHA256" ) )
 		);
 
 	}

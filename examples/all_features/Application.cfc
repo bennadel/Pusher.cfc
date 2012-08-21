@@ -22,9 +22,6 @@ component
 	// Map to our Lib folder so we can access our project components.
 	this.mappings[ "/lib" ] = (this.projectDirectory & "lib/");
 
-	// Map to our Vendor folder so we can access 3rd-party components.
-	this.mappings[ "/vendor" ] = (this.projectDirectory & "vendor/");
-
 
 	// I initialize the session.
 	function onSessionStart(){
@@ -59,8 +56,7 @@ component
 		request.pusher = new lib.Pusher(
 			appID = request.pusherAppID,
 			appKey = request.pusherKey,
-			appSecret = request.pusherSecret,
-			crypto = new vendor.crypto.Crypto()
+			appSecret = request.pusherSecret
 		);
 
 		// Return true so the page can load.
