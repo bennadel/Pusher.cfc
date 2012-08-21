@@ -4,9 +4,9 @@
 by Ben Nadel 
 ([www.bennadel.com][3])
 
-A ColdFusion wrapper for the Puserh.com REST API. This ColdFusion component has 
-been tested with [verion 1.12 of the Pusher.com client][2]. The actual 
-Pusher.cfc exposes two different methods for publication:
+A ColdFusion wrapper for the [Puserh.com][5] REST API. This ColdFusion 
+component has been tested with [verion 1.12 of the Pusher.com client][2]. 
+The actual Pusher.cfc exposes two different methods for publication:
 
 * pushToAllSubscribers( channel, eventType, message )
 * pushToAllSubscribersExcept( channel, eventType, message, socketID )
@@ -44,3 +44,4 @@ needed from its own servers.
 [2]: http://js.pusher.com/1.12/pusher.min.js
 [3]: http://www.bennadel.com
 [4]: http://pusher.com/docs/authenticating_users
+[5]: http://pusher.com
