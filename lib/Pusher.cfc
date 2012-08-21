@@ -45,7 +45,7 @@ component
 		var serializedData = serializeJSON( data );
 
 		// Create a hashed signature for the sockect-channel-data combination.
-		var signature = variables.crypto.hmacSha256(
+		var signature = this._hmacSha256(
 			variables.appSecret,
 			"#socketID#:#channel#:#serializedData#"
 		);
@@ -69,7 +69,7 @@ component
 		){
 
 		// Create a hashed signature for the sockect-channel combination.
-		var signature = variables.crypto.hmacSha256(
+		var signature = this._hmacSha256(
 			variables.appSecret,
 			"#socketID#:#channel#"
 		);
@@ -124,6 +124,17 @@ component
 	// ---
 
 
+	// I compute a hashed message authentication code using the SHA-256 algorithm.
+	function _hmacSha256( String key, String input ){
+
+		// Pass this off to the Crypto library.
+		return(
+			variables.crypto.hmacSha256( key, input )
+		);
+
+	}
+
+
 	// I communicate with the actual Pusher API.
 	function _postEvent(
 		String channel,
@@ -162,7 +173,7 @@ component
 		];
 
 		// Get the auth signature using Hmac-Sha256 hashing.
-		var signature = variables.crypto.hmacSha256(
+		var signature = this._hmacSha256(
 			variables.appSecret,
 			arrayToList( requestParts, "" )
 		);
