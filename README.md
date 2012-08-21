@@ -27,7 +27,7 @@ to expose a (local) end-point on your server. This end-point provides your
 application with the opportunity to approve or reject the subscription to a 
 given channel by a given user.
 
-## ColdFusion 10
+## ColdFusion 10 - No Dependencies
 
 ColdFusion 10 introduced the new hmac() function for natively creating Hashed 
 Message Authentication Codes (Hmac). I have created a ColdFusion 10 branch in
