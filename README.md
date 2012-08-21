@@ -27,6 +27,14 @@ to expose a (local) end-point on your server. This end-point provides your
 application with the opportunity to approve or reject the subscription to a 
 given channel by a given user.
 
+## ColdFusion 10
+
+ColdFusion 10 introduced the new hmac() function for natively creating Hashed 
+Message Authentication Codes (Hmac). I have created a ColdFusion 10 branch in
+the repo in which the Crypto.cfc is replaced with the hmac() function.
+
+Branch: [ColdFusion 10][6]
+
 ## Flash Fallback
 
 In the event that the user's browser doesn't support WebSockets, the Pusher 
@@ -45,3 +53,4 @@ needed from its own servers.
 [3]: http://www.bennadel.com
 [4]: http://pusher.com/docs/authenticating_users
 [5]: http://pusher.com
+[6]: https://github.com/bennadel/Pusher.cfc/tree/coldfusion10
