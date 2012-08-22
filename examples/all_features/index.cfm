@@ -183,9 +183,8 @@
 		<cfset sleep( 3 * 1000 ) />
 
 		<!--- Create a PRIVATE message. --->
-		<cfset message = {
-			"text" = "Ah, Push it! Push it real good!"
-			} />
+		<cfset message = {} />
+		<cfset message[ "text" ] = "Ah, Push it! Push it real good!" />
 
 		<!--- Push the message down the private channel. --->
 		<cfset request.pusher.pushToAllSubscribers(
@@ -196,9 +195,8 @@
 
 
 		<!--- Create a PUBLIC message. --->
-		<cfset message = {
-			"text" = "Something less secure just happened!"
-			} />
+		<cfset message = {} />
+		<cfset message[ "text" ] = "Something less secure just happened!" />
 
 		<!--- Push the message down the public channel. --->
 		<cfset request.pusher.pushToAllSubscribers(

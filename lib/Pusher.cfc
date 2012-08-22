@@ -1,165 +1,318 @@
-<cfscript>
-
-component
-	output = "false"
-	hint = "I provide a gateway to the PusherApp realtime publication server."
-	{
+<cfcomponent
+	output="false"
+	hint="I provide a gateway to the PusherApp realtime publication server.">
 
 
-	// I initialize the component. The Crypto library is used to create Hashed Message Authentication 
-	// Codes for creating request signatures.
-	function init(
-		String appID,
-		String appKey,
-		String appSecret,
-		Any crypto
-		){
+	<cffunction
+		name="init"
+		access="public"
+		returntype="any"
+		output="false"
+		hint="I initialize the component. The Crypto library is used to create Hashed Message Authentication Codes for creating request signatures.">
 
-		// Store the properties.
-		variables.appID = appID;
-		variables.appKey = appKey;
-		variables.appSecret = appSecret;
-		variables.crypto = crypto;
+		<!--- Define arguments. --->
+		<cfargument
+			name="appID"
+			type="string"
+			required="true"
+			hint="I am the Pusher App ID."
+			/>
 
-		// Return this object reference.
-		return( this );
+		<cfargument
+			name="appKey"
+			type="string"
+			required="true"
+			hint="I am the Pusher App key."
+			/>
 
-	}
+		<cfargument
+			name="appSecret"
+			type="string"
+			required="true"
+			hint="I am the Pusher App secret."
+			/>
+
+		<cfargument
+			name="crypto"
+			type="any"
+			required="true"
+			hint="I the Crypto library, needed to generate hmac-hashes - hmacSha256()."
+			/>
+
+		<!--- Store the properties. --->
+		<cfset variables.appID = appID />
+		<cfset variables.appKey = appKey />
+		<cfset variables.appSecret = appSecret />
+		<cfset variables.crypto = crypto />
+
+		<!--- Return this object reference. --->
+		<cfreturn this />
+
+	</cffunction>
 
 
-	// ---
+	<!---
 	// PUBLIC METHODS
-	// ---
+	--->
 
 
-	// I return the authentication object for a presence channel subscription using the given socket.
-	// The [data] argument must contain a user_id key and an optional user_info key.
-	function getPresenceChannelAuthentication( 
-		String socketID,
-		String channel,
-		Struct data
-		){
+	<cffunction
+		name="getPresenceChannelAuthentication"
+		access="public"
+		returntype="struct"
+		output="false"
+		hint="I return the authentication object for a presence channel subscription using the given socket. The [data] argument must contain a user_id key and an optional user_info key.">
 
-		// Serialize the user data - we'll need it for the signature as well as for the authenication
-		// response object.
-		var serializedData = serializeJSON( data );
+		<!--- Define arguments. --->
+		<cfargument
+			name="socketID"
+			type="string"
+			required="true"
+			hint="I am the socket ID the user is connected to (on the Pusher app)."
+			/>
 
-		// Create a hashed signature for the sockect-channel-data combination.
-		var signature = this._hmacSha256(
+		<cfargument
+			name="channel"
+			type="string"
+			required="true"
+			hint="I am the channel the user is trying to subscribe to."
+			/>
+
+		<cfargument
+			name="data"
+			type="struct"
+			required="true"
+			hint="I am the user data being passed to Pusher along with the user subscription."
+			/>
+
+		<!--- Serialize the user data - we'll need it for the signature as well as for the authenication response object. --->
+		<cfset var serializedData = serializeJSON( data ) />
+
+		<!--- Create a hashed signature for the sockect-channel-data combination. --->
+		<cfset var signature = this._hmacSha256(
 			variables.appSecret,
 			"#socketID#:#channel#:#serializedData#"
-		);
+			) />
 
-		// Create the authentication response using the app key, our signature, and the data to pass
-		// through as part of the channel subscription.
-		var authentication = {
-			"auth" = (variables.appKey & ":" & signature),
-			"channel_data" = serializedData
-		};
+		<!--- Create the authentication response using the app key, our signature, and the data to pass through as part of the channel subscription. --->
+		<cfset var authentication = {} />
+		<cfset authentication[ "auth" ] = (variables.appKey & ":" & signature) />
+		<cfset authentication[ "channel_data" ] = serializedData />
 
-		return( authentication );
+		<cfreturn authentication />
 
-	}
+	</cffunction>
 
 
-	// I return the authentication object for a private channel subscription using the given socket.
-	function getPrivateChannelAuthentication(
-		String socketID,
-		String channel
-		){
+	<cffunction
+		name="getPrivateChannelAuthentication"
+		access="public"
+		returntype="struct"
+		output="false"
+		hint="I return the authentication object for a private channel subscription using the given socket.">
 
-		// Create a hashed signature for the sockect-channel combination.
-		var signature = this._hmacSha256(
+		<!--- Define arguments. --->
+		<cfargument
+			name="socketID"
+			type="string"
+			required="true"
+			hint="I am the socket ID the user is connected to (on the Pusher app)."
+			/>
+
+		<cfargument
+			name="channel"
+			type="string"
+			required="true"
+			hint="I am the channel the user is trying to subscribe to."
+			/>
+
+		<!--- Create a hashed signature for the sockect-channel-data combination. --->
+		<cfset var signature = this._hmacSha256(
 			variables.appSecret,
 			"#socketID#:#channel#"
-		);
+			) />
 
-		// Create the authentication response using the app key and our signature.
-		var authentication = {
-			"auth" = (variables.appKey & ":" & signature)
-		};
+		<!--- Create the authentication response using the app key and our signature. --->
+		<cfset var authentication = {} />
+		<cfset authentication[ "auth" ] = (variables.appKey & ":" & signature) />
 
-		return( authentication );
+		<cfreturn authentication />
 
-	}
-
-
-	// I publish the given event to all active subscribers of the given channel. The message data
-	// will be serialized as JSON before it is pushed to the subscribers.
-	function pushToAllSubscribers(
-		String channel,
-		String eventType,
-		Any message
-		){
-
-		// Post the message to Pusher.
-		var response = this._postEvent( channel, eventType, message );
-
-		// Return the underlying HTTP response.
-		return( response );
-
-	}
+	</cffunction>
 
 
-	// I publish the given event to all active subscribers except for the given subscriber on the 
-	// given channel. The message data will be serialized as JSON before it is pushed.
-	function pushToAllSubscribersExcept(
-		String channel,
-		String eventType,
-		Any message,
-		String socketID
-		){
+	<cffunction
+		name="pushToAllSubscribers"
+		access="public"
+		returntype="any"
+		output="false"
+		hint="I publish the given event to all active subscribers of the given channel. The message data will be serialized as JSON before it is pushed to the subscribers.">
 
-		// Post the message to Pusher.
-		var response = this._postEvent( channel, eventType, message, socketID );
+		<!--- Define arguments. --->
+		<cfargument
+			name="channel"
+			type="string"
+			required="true"
+			hint="I am the channel on which to push the event."
+			/>
 
-		// Return the underlying HTTP response.
-		return( response );
+		<cfargument
+			name="eventType"
+			type="string"
+			required="true"
+			hint="I am the event type being triggered."
+			/>
 
-	}
+		<cfargument
+			name="message"
+			type="any"
+			required="true"
+			hint="I am the message being pushed to the subscribers."
+			/>
+
+		<!--- Post the message to Pusher. --->
+		<cfset var response = this._postEvent( channel, eventType, message ) />
+
+		<!--- Return the underlying HTTP response. --->
+		<cfreturn response />
+
+	</cffunction>
 
 
-	// ---
+	<cffunction
+		name="pushToAllSubscribersExcept"
+		access="public"
+		returntype="any"
+		output="false"
+		hint="I publish the given event to all active subscribers except for the given subscriber on the given channel. The message data will be serialized as JSON before it is pushed.">
+
+		<!--- Define arguments. --->
+		<cfargument
+			name="channel"
+			type="string"
+			required="true"
+			hint="I am the channel on which to push the event."
+			/>
+
+		<cfargument
+			name="eventType"
+			type="string"
+			required="true"
+			hint="I am the event type being triggered."
+			/>
+
+		<cfargument
+			name="message"
+			type="any"
+			required="true"
+			hint="I am the message being pushed to the subscribers."
+			/>
+
+		<cfargument
+			name="socketID"
+			type="string"
+			required="true"
+			hint="I am the socketID that originated the message."
+			/>
+
+		<!--- Post the message to Pusher. --->
+		<cfset var response = this._postEvent( channel, eventType, message, socketID ) />
+
+		<!--- Return the underlying HTTP response. --->
+		<cfreturn response />
+
+	</cffunction>
+
+
+	<!---
 	// PRIVATE METHODS
-	// ---
+	--->
 
 
-	// I compute a hashed message authentication code using the SHA-256 algorithm.
-	function _hmacSha256( String key, String input ){
+	<cffunction
+		name="_hmacSha256"
+		access="public"
+		returntype="any"
+		output="false"
+		hint="I compute a hashed message authentication code using the SHA-256 algorithm.">
 
-		// Pass this off to the Crypto library.
-		return(
+		<!--- Define arguments. --->
+		<cfargument
+			name="key"
+			type="string"
+			required="true"
+			hint="I am the secret key being used to generate the hash."
+			/>
+
+		<cfargument
+			name="input"
+			type="string"
+			required="true"
+			hint="I am the value being hashed."
+			/>
+
+		<!--- Pass this off to the Crypto library. --->
+		<cfreturn
 			variables.crypto.hmacSha256( key, input )
-		);
+			/>
 
-	}
+	</cffunction>
 
 
-	// I communicate with the actual Pusher API.
-	function _postEvent(
-		String channel,
-		String eventType,
-		Any message,
-		String socketID = ""
-		){
+	<cffunction
+		name="_postEvent"
+		access="public"
+		returntype="any"
+		output="false"
+		hint="I communicate with the actual Pusher API.">
 
-		// Serialize the message for transport.
-		var serializedMessage = serializeJSON( message );
+		<!--- Define arguments. --->
+		<cfargument
+			name="channel"
+			type="string"
+			required="true"
+			hint="I am the channel on which to push the event."
+			/>
 
-		// Build the resource URI.
-		var resourceUri = "/apps/#variables.appID#/channels/#channel#/events";
+		<cfargument
+			name="eventType"
+			type="string"
+			required="true"
+			hint="I am the event type being triggered."
+			/>
 
-		// Get the current the epoch time in seconds (API requires seconds, not milliseconds).
-		var epochTimeInSeconds = (getTickCount() / 1000);
+		<cfargument
+			name="message"
+			type="any"
+			required="true"
+			hint="I am the message being pushed to the subscribers."
+			/>
 
-		// Get the MD5 hash of the body.
-		var md5Body = lcase( hash( serializedMessage, "md5" ) );
+		<cfargument
+			name="socketID"
+			type="string"
+			required="false"
+			default=""
+			hint="I am the socketID that originated the message."
+			/>
 
-		// Define the version of the API we are using. As of this writing, version 1.0 is the latest.
-		var apiVersion = "1.0";
+		<!--- Serialize the message for transport. --->
+		<cfset var serializedMessage = serializeJSON( message ) />
 
-		// In order post, we have to create a signature of the request. To create the signature,
-		var requestParts = [
+		<!--- Build the resource URI. --->
+		<cfset var resourceUri = "/apps/#variables.appID#/channels/#channel#/events" />
+
+		<!--- Get the current the epoch time in seconds (API requires seconds, not milliseconds). --->
+		<cfset var epochTimeInSeconds = (getTickCount() / 1000) />
+
+		<!--- Get the MD5 hash of the body. --->
+		<cfset var md5Body = lcase( hash( serializedMessage, "md5" ) ) />
+
+		<!--- Define the version of the API we are using. As of this writing, version 1.0 is the latest. --->
+		<cfset var apiVersion = "1.0" />
+
+		<!--- In order post, we have to create a signature of the request. --->
+		<cfset var requestParts = [
 			"POST",
 			chr( 10 ),
 			resourceUri,
@@ -170,87 +323,84 @@ component
 			"body_md5=#md5Body#&",
 			"name=#eventType#&",
 			"socket_id=#socketID#"
-		];
+			] />
 
-		// Get the auth signature using Hmac-Sha256 hashing.
-		var signature = this._hmacSha256(
+		<!--- Get the auth signature using Hmac-Sha256 hashing. --->
+		<cfset var signature = this._hmacSha256(
 			variables.appSecret,
 			arrayToList( requestParts, "" )
-		);
+			) />
 
-		// Build the HTTP request.
-		var httpRequest = new HTTP(
-			method = "post",
-			url = ("http://api.pusherapp.com" & resourceUri),
-			charset = "utf-8"
-		);
+		<!--- Var the HTTP response. --->
+		<cfset var httpResponse = {} />
 
-		httpRequest.addParam(
-			type = "url",
-			name = "name",
-			value = eventType
-		);
+		<!--- Build the HTTP request. --->
+		<cfhttp
+			result="httpResponse"
+			method="post"
+			url="http://api.pusherapp.com#resourceUri#"
+			charset="utf-8">
 
-		httpRequest.addParam(
-			type = "url",
-			name = "body_md5",
-			value = md5Body
-		);
+			<cfhttpparam
+				type="url"
+				name="name"
+				value="#eventType#"
+				/>
 
-		httpRequest.addParam(
-			type = "url",
-			name = "socket_id",
-			value = socketID
-		);
+			<cfhttpparam
+				type="url"
+				name="body_md5"
+				value="#md5Body#"
+				/>
 
-		httpRequest.addParam(
-			type = "url",
-			name = "auth_key",
-			value = variables.appKey
-		);
+			<cfhttpparam
+				type="url"
+				name="socket_id"
+				value="#socketID#"
+				/>
 
-		httpRequest.addParam(
-			type = "url",
-			name = "auth_timestamp",
-			value = epochTimeInSeconds
-		);
+			<cfhttpparam
+				type="url"
+				name="auth_key"
+				value="#variables.appKey#"
+				/>
 
-		httpRequest.addParam(
-			type = "url",
-			name = "auth_signature",
-			value = signature
-		);
+			<cfhttpparam
+				type="url"
+				name="auth_timestamp"
+				value="#epochTimeInSeconds#"
+				/>
 
-		httpRequest.addParam(
-			type = "url",
-			name = "auth_version",
-			value = apiVersion
-		);
+			<cfhttpparam
+				type="url"
+				name="auth_signature"
+				value="#signature#"
+				/>
 
-		// The message must be passed through as a JSON body.
-		httpRequest.addParam(
-			type = "header",
-			name = "content-type",
-			value = "application/json"
-		);
+			<cfhttpparam
+				type="url"
+				name="auth_version"
+				value="#apiVersion#"
+				/>
 
-		httpRequest.addParam(
-			type = "body",
-			value = serializedMessage
-		);
+			<!--- The message must be passed through as a JSON body. --->
+			<cfhttpparam
+				type="header"
+				name="content-type"
+				value="application/json"
+				/>
 
-		// Send the HTTP request and get the result.
-		var response = httpRequest
-			 .send()
-			 .getPrefix()
-		;
+			<cfhttpparam
+				type="body"
+				value="#serializedMessage#"
+				/>
 
-		// Return the response.
-		return( response );
+		</cfhttp>
 
-	}
+		<!--- Return the response. --->
+		<cfreturn httpResponse />
+
+	</cffunction>
 
 
-}
-
-</cfscript>
+</cfcomponent>

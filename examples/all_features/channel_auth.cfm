@@ -59,12 +59,10 @@
 		All of these values will be published to the presence channel
 		for clients to consume.
 	--->
-	<cfset channelData = {
-		"user_id" = session.user.id,
-		"user_info" = {
-			"name" = session.user.name
-			}
-		} />
+	<cfset channelData = {} />
+	<cfset channelData[ "user_id" ] = session.user.id />
+	<cfset channelData[ "user_info" ] = {} />
+	<cfset channelData.user_info[ "name" ] = session.user.name />
 
 	<cfset authentication = request.pusher.getPresenceChannelAuthentication(
 		form.socket_id,
