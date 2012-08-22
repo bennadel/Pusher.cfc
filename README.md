@@ -35,6 +35,14 @@ the repo in which the Crypto.cfc is replaced with the hmac() function.
 
 Branch: [ColdFusion 10][6]
 
+## ColdFusion 8 Compatible
+
+I have created a __very quick__ translation of the ColdFusion 9.0.1 version
+(this one) over to a ColdFusion 8 version for users on older systems. I made
+sure that the Example worked; but, I did not other further testing.
+
+Branch: [ColdFusion 8][7]
+
 ## Flash Fallback
 
 In the event that the user's browser doesn't support WebSockets, the Pusher 
@@ -54,3 +62,4 @@ needed from its own servers.
 [4]: http://pusher.com/docs/authenticating_users
 [5]: http://pusher.com
 [6]: https://github.com/bennadel/Pusher.cfc/tree/coldfusion10
+[7]: https://github.com/bennadel/Pusher.cfc/tree/coldfusion8
