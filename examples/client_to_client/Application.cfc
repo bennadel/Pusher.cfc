@@ -39,12 +39,11 @@ component
 		// *********************************************************
 
 		// Create an instance of our pusher component using our demo
-		// credentials and the Crypto library.
+		// credentials.
 		request.pusher = new lib.Pusher(
 			appID = request.pusherAppID,
 			appKey = request.pusherKey,
-			appSecret = request.pusherSecret,
-			crypto = new vendor.crypto.Crypto()
+			appSecret = request.pusherSecret
 		);
 
 		// Return true so the page can load.
